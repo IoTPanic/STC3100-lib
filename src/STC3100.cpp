@@ -1,7 +1,12 @@
 #include "STC3100.h"
 
-STC3100::STC3100(){
-
+/**
+ * @brief Construct a new STC3100::STC3100 object to reference IC
+ * 
+ * @param resistor_value The value of the current sensing resistor in milliOhms
+ */
+STC3100::STC3100(uint resistor_value){
+    current_resistor_value = resistor_value;
 }
 
 void STC3100::init(){

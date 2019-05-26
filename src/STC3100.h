@@ -79,7 +79,7 @@ class STC3100
         uint16_t temp;
     } Reading;
 
-    STC3100();
+    STC3100(uint resistor_value);
     
     void init();
     
@@ -100,6 +100,7 @@ class STC3100
     uint16_t get_value(uint8_t reg);
 
     uint8_t serial_number[8];
+    uint current_resistor_value = 0;
     bool running = false;
 };
 
