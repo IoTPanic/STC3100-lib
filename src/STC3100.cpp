@@ -8,6 +8,15 @@ void STC3100::init(){
     Wire.begin();
 }
 
+/**
+ * @brief start() will check if it can read and confirm the serial number. 
+ * If the serial number can be read and confirmed, this function will set the
+ * chip to start taking readings.
+ * 
+ * @return true When serial is read and confirmed and chip is started
+ * @return false Serial number could not be correctly read
+ */
+
 bool STC3100::start(){
     if(!get_serial(serial_number)){
         return false;
@@ -29,11 +38,21 @@ STC3100::Reading STC3100::read(){
     return r;
 }
 
+/**
+ * @brief Gets the current battery voltage
+ * 
+ * @return float Battery voltage
+ */
 float STC3100::voltage(){
     float v = ((float) get_value(REG_VOLTAGE_LOW) * 2.44)/1000;
     return v;
 }
 
+/**
+ * @brief Gets the current temperature as a float in celsius
+ * 
+ * @return float Temperature in celsius
+ */
 float STC3100::temp(){
     float t = ((float)get_value(REG_TEMP_LOW))/10;
     return t;
@@ -45,6 +64,14 @@ float STC3100::current(){
     return c;
 }
 
+/**
+ * @brief Reads serial number from battery IC
+ * 
+ * @param serial Pointer to 8 byte array to store serial number in
+ * @return true Serial number is valid
+ * @return false Serial number failed CRC
+ */
+
 bool STC3100::get_serial(uint8_t *serial){
     Wire.beginTransmission(BUS_ADDRESS);
     Wire.write(REG_ID0);
@@ -53,9 +80,16 @@ bool STC3100::get_serial(uint8_t *serial){
     for(uint i =0; i<8; i++){
         serial[i] = Wire.read();
     }
-    Serial.println(crc(serial, 7));
     return crc(serial, 7)==serial[7];
 }
+
+/**
+ * @brief CRC preforms a checksum on data
+ * 
+ * @param data Pointer to data array we want to checksum
+ * @param size Size of data we want to checksum
+ * @return uint8_t CRC8 value generated from data
+ */
 
 uint8_t STC3100::crc(const void * data, size_t size){
     uint8_t val = 0;
@@ -67,6 +101,14 @@ uint8_t STC3100::crc(const void * data, size_t size){
     }
     return val;
 }
+
+/**
+ * @brief Get value from the STC3100 chip by taking the high
+ * and low byte of a sensor reading and returning a single 16 bit value
+ * 
+ * @param reg Register to read two bytes from
+ * @return uint16_t Value read
+ */
 
 uint16_t STC3100::get_value(uint8_t reg){
     Wire.beginTransmission(BUS_ADDRESS);
@@ -82,6 +124,12 @@ uint16_t STC3100::get_value(uint8_t reg){
     return value;
 }
 
+/**
+ * @brief Writes byte to STC3100 IC register
+ * 
+ * @param location Location in i2c IC to write value
+ * @param value Value to write to IC
+ */
 void STC3100::write_byte(uint8_t location, uint8_t value){
     Wire.beginTransmission(BUS_ADDRESS);
     Wire.write(REG_MODE);

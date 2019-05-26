@@ -80,9 +80,11 @@ class STC3100
     } Reading;
 
     STC3100();
+    
     void init();
+    
     bool start();
-   
+
     bool get_serial(uint8_t *serial);
 
     float voltage();
