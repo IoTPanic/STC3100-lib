@@ -12,10 +12,7 @@ bool STC3100::start(){
     if(!get_serial(serial_number)){
         return false;
     }
-    Wire.beginTransmission(0x70);
-    Wire.write(REG_MODE);
-    Wire.write(0x8);
-    Wire.endTransmission();
+    write_byte(REG_MODE, 0x8);
     running = true;
     return true;
 }
@@ -26,23 +23,23 @@ STC3100::Reading STC3100::read(){
         return r;
     }
     r.valid = true;
-    r.voltage = get_voltage();
-    r.temp = get_temp();
-    r.current = get_current();
+    r.voltage = get_value(REG_VOLTAGE_LOW);
+    r.temp = get_value(REG_TEMP_LOW);
+    r.current = get_value(REG_CURRENT_LOW);
     return r;
 }
 
-float STC3100::get_voltage(){
+float STC3100::voltage(){
     float v = ((float) get_value(REG_VOLTAGE_LOW) * 2.44)/1000;
     return v;
 }
 
-float STC3100::get_temp(){
+float STC3100::temp(){
     float t = ((float)get_value(REG_TEMP_LOW))/10;
     return t;
 }
 
-float STC3100::get_current(){
+float STC3100::current(){
     float c = ((float)get_value(REG_CURRENT_LOW) * 11.77);
     Serial.println(get_value(REG_CURRENT_LOW));
     return c;
@@ -71,7 +68,7 @@ uint8_t STC3100::crc(const void * data, size_t size){
     return val;
 }
 
-int STC3100::get_value(uint8_t reg){
+uint16_t STC3100::get_value(uint8_t reg){
     Wire.beginTransmission(BUS_ADDRESS);
     Wire.write(reg);
     Wire.endTransmission();
@@ -79,8 +76,15 @@ int STC3100::get_value(uint8_t reg){
     uint8_t low =  Wire.read();         // print the character
     uint8_t high = Wire.read();
     unsigned int high_byte  = (unsigned int)high;
-    int value = 0;
+    uint16_t value = 0;
     high_byte <<=8;
     value = (high_byte&0xFF00) | low;
     return value;
+}
+
+void STC3100::write_byte(uint8_t location, uint8_t value){
+    Wire.beginTransmission(BUS_ADDRESS);
+    Wire.write(REG_MODE);
+    Wire.write(value);
+    Wire.endTransmission();
 }

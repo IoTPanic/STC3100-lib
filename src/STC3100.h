@@ -74,26 +74,28 @@ class STC3100
 
     typedef struct{
         bool valid;
-        float voltage;
-        float current;
-        float temp;
+        uint16_t voltage;
+        uint16_t current;
+        uint16_t temp;
     } Reading;
 
     STC3100();
     void init();
     bool start();
-    Reading read();
+   
     bool get_serial(uint8_t *serial);
 
+    float voltage();
+    float temp();
+    float current();
+
     protected:
-    float get_voltage();
-    float get_temp();
-    float get_current();
+    Reading read();
 
     private:
-    void write_byte();
+    void write_byte(uint8_t location, uint8_t value);
     uint8_t crc(const void * data, size_t size);
-    int get_value(uint8_t reg);
+    uint16_t get_value(uint8_t reg);
 
     uint8_t serial_number[8];
     bool running = false;
