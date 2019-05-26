@@ -74,7 +74,7 @@ class STC3100
 
     typedef struct{
         bool valid;
-        uint16_t voltage;
+        float voltage;
         float current;
         float temp;
     } Reading;
