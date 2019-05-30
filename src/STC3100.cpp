@@ -26,14 +26,17 @@ bool STC3100::start(){
     if(!get_serial(serial_number)){
         return false;
     }
-    write_byte(REG_MODE, 0x8);
-    running = true;
+    _running = true;
+    Serial.println(get_value(REG_CTRL), BIN);
+    write_byte(REG_CTRL, 0x02);
+    // Start gauge
+    write_byte(REG_MODE, 0x10);
     return true;
 }
 
 STC3100::Reading STC3100::read(){
     Reading r;
-    if(!running){
+    if(!_running){
         return r;
     }
     r.valid = true;
@@ -46,10 +49,10 @@ STC3100::Reading STC3100::read(){
 /**
  * @brief Gets the current battery voltage
  * 
- * @return float Battery voltage
+ * @return float Battery voltage in milliVolts
  */
-float STC3100::voltage(){
-    float v = ((float) get_value(REG_VOLTAGE_LOW) * 2.44)/1000;
+uint STC3100::voltage(){
+    uint v = ((uint) get_value(REG_VOLTAGE_LOW) * 2.44);
     return v;
 }
 
@@ -58,15 +61,23 @@ float STC3100::voltage(){
  * 
  * @return float Temperature in celsius
  */
-float STC3100::temp(){
-    float t = ((float)get_value(REG_TEMP_LOW))/10;
+uint STC3100::temp(){
+    uint t = ((uint)get_value(REG_TEMP_LOW))/10;
     return t;
 }
 
-float STC3100::current(){
-    float c = ((float)get_value(REG_CURRENT_LOW) * 11.77);
-    Serial.println(get_value(REG_CURRENT_LOW));
-    return c;
+long STC3100::current(){
+    //uint16_t v = get_value(REG_CURRENT_LOW);
+    short current =  get_value(REG_CURRENT_LOW);
+    unsigned short cov = 48210 / 33;
+    current &= 0x3fff;
+    if (current>=0x2000) current -= 0x4000;
+    long v = ((long)current * cov)>>12;
+    return v;
+}
+
+bool STC3100::running(){
+    return _running;
 }
 
 /**
@@ -122,10 +133,9 @@ uint16_t STC3100::get_value(uint8_t reg){
     Wire.requestFrom(BUS_ADDRESS, 2);
     uint8_t low =  Wire.read();         // print the character
     uint8_t high = Wire.read();
-    unsigned int high_byte  = (unsigned int)high;
-    uint16_t value = 0;
-    high_byte <<=8;
-    value = (high_byte&0xFF00) | low;
+    uint16_t high_byte  = high;
+    uint16_t value = low;
+    value |= high<<8;
     return value;
 }
 

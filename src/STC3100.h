@@ -87,9 +87,11 @@ class STC3100
 
     bool get_serial(uint8_t *serial);
 
-    float voltage();
-    float temp();
-    float current();
+    uint voltage();
+    uint temp();
+    long current();
+
+    bool running();
 
     protected:
     Reading read();
@@ -101,7 +103,7 @@ class STC3100
 
     uint8_t serial_number[8];
     uint current_resistor_value = 0;
-    bool running = false;
+    bool _running = false;
 };
 
 #endif
