@@ -62,7 +62,7 @@ uint STC3100::voltage(){
  * @return float Temperature in celsius
  */
 uint STC3100::temp(){
-    uint t = ((uint)get_value(REG_TEMP_LOW))/10;
+    uint t = ((uint)get_value(REG_TEMP_LOW));
     return t;
 }
 
